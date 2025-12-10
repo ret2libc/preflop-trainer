@@ -1,0 +1,21 @@
+[package]
+name = "preflop-trainer-gui"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+preflop-trainer-core = { path = "../preflop-trainer-core" }
+iced = { version = "0.12", features = [
+    "tokio",
+    "advanced",
+    "svg",
+] } # Adding common features and svg
+# For styling
+iced_style = "0.5"  # iced 0.12 typically uses iced_style 0.5
+include_dir = "0.7"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"

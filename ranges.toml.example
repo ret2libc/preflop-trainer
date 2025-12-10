@@ -1,0 +1,132 @@
+# This is an example configuration file for Preflop Trainer.
+# To use it, rename this file to `ranges.toml`.
+
+# Welcome to your personal preflop range configuration file.
+# This file is where you define the hands you want to play in different situations.
+# The format is TOML (https://toml.io), which is designed to be easy to read.
+
+# --- HOW TO DEFINE RANGES ---
+#
+# A "range" is a collection of poker hands. You can specify a range as a comma-separated
+# string of hand notations.
+#
+# --- HAND NOTATION ---
+#
+# - Specific pairs: AA, KK, QQ, etc.
+# - Suited hands: AKs (Ace-King suited), T9s (Ten-Nine suited), etc.
+# - Offsuit hands: AKo (Ace-King offsuit), 76o (Seven-Six offsuit), etc.
+#
+# --- MIXED STRATEGIES (FREQUENCIES) ---
+#
+# For situations where you don't want to play a hand 100% of the time, you can
+# specify a "mixed strategy" by adding a frequency to the hand notation.
+#
+# The format is: <Hand>:<Frequency>
+#
+# For example:
+# - "KJs:0.5" means you want to play King-Jack suited 50% of the time.
+# - "A5s:0.25" means you want to play Ace-Five suited 25% of the time.
+#
+# If no frequency is specified, it is assumed to be 1.0 (i.e., play the hand 100% of the time).
+
+# --- SECTION: UNOPENED RAISE RANGES ---
+#
+# This section defines your opening ranges when the action folds to you in an
+# unopened pot. You should define a range for each position.
+#
+# The positions are:
+# - UTG (Under the Gun)
+# - MP (Middle Position)
+# - CO (Cutoff)
+# - BTN (Button)
+# - SB (Small Blind)
+
+[unopened_raise.UTG]
+# Example range for opening from Under the Gun.
+# This is a tight range, consisting of strong hands.
+range = "AA,KK,QQ,JJ,TT,AKs,AQs,AJs,AKo,AQo"
+
+[unopened_raise.MP]
+# As your position gets later, you can open a wider range of hands.
+range = "AA,KK,QQ,JJ,TT,99,AKs,AQs,AJs,ATs,KQs,AKo,AQo,AJo"
+
+[unopened_raise.CO]
+range = "AA,KK,QQ,JJ,TT,99,88,AKs,AQs,AJs,ATs,A9s,KQs,KJs,QJs,AKo,AQo,AJo,ATo,KQo"
+
+[unopened_raise.BTN]
+# From the button, you can open a very wide range.
+range = "AA,KK,QQ,JJ,TT,99,88,77,66,55,AKs,AQs,AJs,ATs,A9s,A8s,A7s,A6s,A5s,KQs,KJs,KTs,QJs,QTs,JTs,AKo,AQo,AJo,ATo,A9o,KQo,KJo,QJo"
+
+[unopened_raise.SB]
+# The Small Blind also opens a wide range, but may play differently than the button
+# due to being out of position postflop.
+range = "AA,KK,QQ,JJ,TT,99,88,77,AKs,AQs,AJs,ATs,KQs,KJs,QJs,AKo,AQo,AJo,KQo"
+
+
+# --- SECTION: BIG BLIND DEFENSE RANGES ---
+#
+# This section defines how you should react when you are in the Big Blind and
+# a single player has raised before you.
+#
+# You have two primary actions: Call or Re-raise (3-bet).
+#
+# For each potential opener position, you need to define two ranges:
+# - `call_range`: The hands you will call with.
+# - `raise_range`: The hands you will re-raise with.
+
+[bb_defense.UTG]
+# Defending the Big Blind vs. an Under the Gun open.
+# Since UTG's range is tight, your defending range should also be tight.
+call_range = "JJ,TT,99,88,AJs,ATs,KQs"
+raise_range = "AA,KK,QQ,AKs,AKo"
+
+[bb_defense.MP]
+# Defending vs. a Middle Position open.
+call_range = "JJ,TT,99,88,77,AQs,AJs,ATs,KQs,KJs"
+raise_range = "AA,KK,QQ,AKs,AKo,AQo"
+
+[bb_defense.CO]
+call_range = "TT,99,88,77,66,AJs,ATs,A9s,KQs,KJs,KTs,QJs"
+raise_range = "AA,KK,QQ,JJ,AKs,AQs,AKo,AQo"
+
+[bb_defense.BTN]
+# Defending vs. a Button open.
+# The Button's opening range is wide, so you can defend with a much wider range.
+call_range = "99,88,77,66,55,ATs,A9s,A8s,KJs,KTs,K9s,QJs,QTs,JTs,T9s,98s,AJo,ATo,KQo,KJo"
+raise_range = "AA,KK,QQ,JJ,TT,AKs,AQs,AJs,AKo,AQo"
+
+[bb_defense.SB]
+# Defending vs. a Small Blind open.
+# The Small Blind's opening range is also wide.
+call_range = "99,88,77,66,55,ATs,A9s,A8s,KJs,KTs,K9s,QJs,QTs,JTs,T9s,98s,AJo,ATo,KQo,KJo"
+raise_range = "AA,KK,QQ,JJ,TT,AKs,AQs,AJs,AKo,AQo"
+
+[generic]
+# This section allows you to specify which types of preflop spots you want to practice.
+# If this section is omitted, the trainer will randomly generate all possible spot types.
+#
+# Each entry in the list should be a string representing a specific spot type and position.
+#
+# Format for Open spots: "Open_<Position>"
+#   - Positions: UTG, MP, CO, BTN, SB
+#   - Examples: "Open_UTG", "Open_BTN"
+#
+# Format for Big Blind Defense spots: "BBDefense_<OpenerPosition>"
+#   - Opener Positions: UTG, MP, CO, BTN, SB
+#   - Examples: "BBDefense_UTG", "BBDefense_BTN"
+#
+# Example: Practice only opening from the Button and defending the Big Blind vs. a CO open.
+# allowed_spot_types = ["Open_BTN", "BBDefense_CO"]
+
+# Example: Practice only opening from all positions (and no BB Defense)
+# allowed_spot_types = ["Open_UTG", "Open_MP", "Open_CO", "Open_BTN", "Open_SB"]
+
+# Example: Practice only BB Defense vs. all positions (and no opening)
+# allowed_spot_types = [
+#   "BBDefense_UTG", "BBDefense_MP", "BBDefense_CO", "BBDefense_BTN", "BBDefense_SB"
+# ]
+
+allowed_spot_types = [
+  "Open_UTG", "Open_MP", "Open_CO", "Open_BTN", "Open_SB",
+  "BBDefense_UTG", "BBDefense_MP", "BBDefense_CO", "BBDefense_BTN", "BBDefense_SB"
+]

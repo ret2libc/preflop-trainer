@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "crates/preflop-trainer-core",
+    "crates/preflop-trainer-cli",
+    "crates/preflop-trainer-gui",
+]

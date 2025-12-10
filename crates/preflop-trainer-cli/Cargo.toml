@@ -1,0 +1,18 @@
+[package]
+name = "preflop-trainer-cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+preflop-trainer-core = { path = "../preflop-trainer-core" }
+colored = "3.0.0"
+rand = "0.9.2"
+serde = { version = "1.0.228", features = [
+    "derive",
+] } # Though not directly used by CLI, its in Cargo.lock
+toml = "0.9.8" # Though not directly used by CLI, its in Cargo.lock
+# termion is Unix-only; enable only for Unix targets
+
+[target.'cfg(unix)'.dependencies]
+termion = "1.5.6"
+clap = { version = "4.0", features = ["derive"] }

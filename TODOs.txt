@@ -1,0 +1,40 @@
+# Preflop Trainer TODO List
+
+## Current Gameplay Mechanics
+- [x] Implement Call/Raise/Fold in the CLI, not only in the GUI.
+- [x] implement a subcommand in the CLI to accept a range as a string and a hand and tells whether the hand is in range or not. 
+
+## Completed Gameplay Mechanics
+- [x] 1. Implement continuous gameplay loop without requiring 'Enter' to proceed. The game should continue to the next hand immediately after a result is shown.
+- [x] 2. Allow exiting the game gracefully using CTRL-D. Ensure that if the user exits mid-question, that question is not counted in the final score.
+- [x] 3. Implement a weighted random hand selection system. It should prioritize generating hands that are on the "edge" of a player's configured range to make training more effective.
+- [x] 4. Introduce an RNG value (0-99) for each spot to handle mixed strategies correctly. For a hand with a 50% raise frequency, an RNG value < 50 should be a "Raise" and >= 50 should be a "Fold".
+- [x] 5. Refactor the `check_answer` function to correctly handle the new RNG value for mixed strategies.
+- [x] Each question overwrites the previous one, so the user can't see the result of the previous answer. Do not clear the screen between questions, allowing the user to see their past answers and results.
+- [x] Do not consider the last question, on which I press CTRL-D, in the final score calculation.
+- [x] Do not clear the screen between questions! This is still a problem!
+- [x] Show "Correct", "Wrong", or "Frequency mistake".
+- [x] Show "Frequency mistake" when the hand is part of a mixed strategy but the user selected the wrong action based on the value of the RNG.
+
+## User Interface
+- [x] 6. Enhance the visual presentation of the game. Create a more graphical representation of the poker table, player positions, and cards to improve immersion.
+- [x] 7. Consider creating a full Graphical User Interface (GUI) for the application.
+
+## Current Feature Expansion
+
+## Feature Expansion
+- [x] Allow users to specify which spots they want to practice against:
+    - [x] Unopened pot + BB defense, any position
+    - [x] Unopened pot, only selected positions
+    - [x] BB defense from any position
+    - [x] BB defense from selected positions
+    - [ ] 3bp, 4bp, etc.
+- [x] Show spot in previous hand graphics
+- [x] Split with a separator/line the previous hand from current hand
+- [ ] 8. Expand game logic to support more preflop scenarios, such as 3-betting, 4-betting, and defending against raises from different positions.
+- [ ] 9. Implement detailed statistics and progress tracking. This could include stats per position, per hand type, etc.
+- [ ] When the game ends, show history of played hands and allow users to go back and see selected action and what was the correct answer. 
+
+## Development & Code Quality
+- [x] 10. Set up and enforce a strict linting policy using `clippy` to maintain high code quality.
+- [x] 11. Establish a Git workflow for the project, including conventions for branching, commits, and pull requests.
