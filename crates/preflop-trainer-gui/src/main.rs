@@ -6,16 +6,27 @@ use iced::{
     widget::{Button, Svg, column, container, row, text},
 };
 // Embed the `assets/cards` directory so the binary can render cards without external assets.
- 
 
 // `include_dir!` paths are relative to the crate root (where Cargo.toml is),
 // the repository `assets` directory lives two levels up from the crate root.
 // Embed the four suit SVGs so the binary can render cards without external assets.
 // Embed the four suit SVGs so the binary can render cards without external assets.
-static SUIT_C_SVG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/cards/suit_c.svg"));
-static SUIT_D_SVG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/cards/suit_d.svg"));
-static SUIT_H_SVG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/cards/suit_h.svg"));
-static SUIT_S_SVG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/cards/suit_s.svg"));
+static SUIT_C_SVG: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../assets/cards/suit_c.svg"
+));
+static SUIT_D_SVG: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../assets/cards/suit_d.svg"
+));
+static SUIT_H_SVG: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../assets/cards/suit_h.svg"
+));
+static SUIT_S_SVG: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../assets/cards/suit_s.svg"
+));
 
 pub fn main() -> iced::Result {
     PreflopTrainerGui::run(iced::Settings {
@@ -74,26 +85,44 @@ impl Application for PreflopTrainerGui {
             if cwd_candidate.exists() {
                 cwd_candidate
             } else if let Ok(exe_path) = std::env::current_exe() {
-                let exe_dir = exe_path.parent().map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+                let exe_dir = exe_path
+                    .parent()
+                    .map(PathBuf::from)
+                    .unwrap_or_else(|| PathBuf::from("."));
                 let exe_candidate = exe_dir.join("ranges.toml");
                 if exe_candidate.exists() {
                     exe_candidate
                 } else {
                     // Fallback: write embedded example to a temp file and use it
-                    let tmp = std::env::temp_dir().join(format!("preflop_trainer_ranges_{}.toml", process::id()));
-                    let _ = std::fs::write(&tmp, include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../ranges.toml.example")));
+                    let tmp = std::env::temp_dir()
+                        .join(format!("preflop_trainer_ranges_{}.toml", process::id()));
+                    let _ = std::fs::write(
+                        &tmp,
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../../ranges.toml.example"
+                        )),
+                    );
                     tmp
                 }
             } else {
                 // As a last resort, temp file from embedded example
-                let tmp = std::env::temp_dir().join(format!("preflop_trainer_ranges_{}.toml", process::id()));
-                let _ = std::fs::write(&tmp, include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../ranges.toml.example")));
+                let tmp = std::env::temp_dir()
+                    .join(format!("preflop_trainer_ranges_{}.toml", process::id()));
+                let _ = std::fs::write(
+                    &tmp,
+                    include_str!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../../ranges.toml.example"
+                    )),
+                );
                 tmp
             }
         };
 
-        let config = preflop_trainer_core::load_and_parse_config(config_path.to_string_lossy().as_ref())
-            .expect("Failed to load or parse ranges.toml");
+        let config =
+            preflop_trainer_core::load_and_parse_config(config_path.to_string_lossy().as_ref())
+                .expect("Failed to load or parse ranges.toml");
 
         let mut game = preflop_trainer_core::Game::new(config.clone());
         let (spot_type, hand, rng_value) = game
