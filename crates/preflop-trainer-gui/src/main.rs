@@ -5,11 +5,17 @@ use iced::{
     executor, theme,
     widget::{Button, Svg, column, container, row, text},
 };
+// Embed the `assets/cards` directory so the binary can render cards without external assets.
+ 
+
+// `include_dir!` paths are relative to the crate root (where Cargo.toml is),
+// the repository `assets` directory lives two levels up from the crate root.
 // Embed the four suit SVGs so the binary can render cards without external assets.
-static SUIT_C_SVG: &[u8] = include_bytes!("../../../assets/cards/suit_c.svg");
-static SUIT_D_SVG: &[u8] = include_bytes!("../../../assets/cards/suit_d.svg");
-static SUIT_H_SVG: &[u8] = include_bytes!("../../../assets/cards/suit_h.svg");
-static SUIT_S_SVG: &[u8] = include_bytes!("../../../assets/cards/suit_s.svg");
+// Embed the four suit SVGs so the binary can render cards without external assets.
+static SUIT_C_SVG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/cards/suit_c.svg"));
+static SUIT_D_SVG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/cards/suit_d.svg"));
+static SUIT_H_SVG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/cards/suit_h.svg"));
+static SUIT_S_SVG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/cards/suit_s.svg"));
 
 pub fn main() -> iced::Result {
     PreflopTrainerGui::run(iced::Settings {
@@ -59,8 +65,34 @@ impl Application for PreflopTrainerGui {
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let config_path = "ranges.toml";
-        let config = preflop_trainer_core::load_and_parse_config(config_path)
+        use std::path::PathBuf;
+        use std::process;
+
+        // Determine config path: prefer working dir, then executable directory, then embedded example.
+        let config_path = {
+            let cwd_candidate = PathBuf::from("ranges.toml");
+            if cwd_candidate.exists() {
+                cwd_candidate
+            } else if let Ok(exe_path) = std::env::current_exe() {
+                let exe_dir = exe_path.parent().map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+                let exe_candidate = exe_dir.join("ranges.toml");
+                if exe_candidate.exists() {
+                    exe_candidate
+                } else {
+                    // Fallback: write embedded example to a temp file and use it
+                    let tmp = std::env::temp_dir().join(format!("preflop_trainer_ranges_{}.toml", process::id()));
+                    let _ = std::fs::write(&tmp, include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../ranges.toml.example")));
+                    tmp
+                }
+            } else {
+                // As a last resort, temp file from embedded example
+                let tmp = std::env::temp_dir().join(format!("preflop_trainer_ranges_{}.toml", process::id()));
+                let _ = std::fs::write(&tmp, include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../ranges.toml.example")));
+                tmp
+            }
+        };
+
+        let config = preflop_trainer_core::load_and_parse_config(config_path.to_string_lossy().as_ref())
             .expect("Failed to load or parse ranges.toml");
 
         let mut game = preflop_trainer_core::Game::new(config.clone());
@@ -203,16 +235,20 @@ impl Application for PreflopTrainerGui {
                             .horizontal_alignment(Horizontal::Center)
                             .style(theme::Text::Color(suit_color)),
                         {
-                            let asset_name = card.suit.to_asset_string();
-                            let handle = match asset_name.as_str() {
-                                "c" => iced::widget::svg::Handle::from_memory(SUIT_C_SVG.to_vec()),
-                                "d" => iced::widget::svg::Handle::from_memory(SUIT_D_SVG.to_vec()),
-                                "h" => iced::widget::svg::Handle::from_memory(SUIT_H_SVG.to_vec()),
-                                "s" => iced::widget::svg::Handle::from_memory(SUIT_S_SVG.to_vec()),
-                                _ => iced::widget::svg::Handle::from_path(format!(
-                                    "assets/cards/{}.svg",
-                                    asset_name
-                                )),
+                            // Match directly on the suit enum so we reliably use embedded bytes.
+                            let handle = match card.suit {
+                                preflop_trainer_core::Suit::Clubs => {
+                                    iced::widget::svg::Handle::from_memory(SUIT_C_SVG.to_vec())
+                                }
+                                preflop_trainer_core::Suit::Diamonds => {
+                                    iced::widget::svg::Handle::from_memory(SUIT_D_SVG.to_vec())
+                                }
+                                preflop_trainer_core::Suit::Hearts => {
+                                    iced::widget::svg::Handle::from_memory(SUIT_H_SVG.to_vec())
+                                }
+                                preflop_trainer_core::Suit::Spades => {
+                                    iced::widget::svg::Handle::from_memory(SUIT_S_SVG.to_vec())
+                                }
                             };
                             Svg::new(handle)
                         }

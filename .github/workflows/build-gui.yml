@@ -85,7 +85,8 @@ jobs:
       - name: Package GUI build (script)
         shell: bash
         run: |
-          python scripts/package_gui.py --crate crates/preflop-trainer-gui --assets assets --single
+          # Package only the main executable (assets are embedded in the binary)
+          python scripts/package_gui.py --crate crates/preflop-trainer-gui --single
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

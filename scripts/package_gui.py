@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Package GUI release artifacts and assets into a single zip.
-
-Usage: python scripts/package_gui.py --crate crates/preflop-trainer-gui --assets assets
+Usage: python scripts/package_gui.py --crate crates/preflop-trainer-gui
 """
 from pathlib import Path
 import argparse
@@ -35,7 +34,6 @@ def is_library(p: Path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--crate', default='crates/preflop-trainer-gui')
-    parser.add_argument('--assets', default='assets')
     parser.add_argument('--out', default=None)
     parser.add_argument('--single', action='store_true', help='Package only the main executable')
     args = parser.parse_args()
@@ -58,7 +56,7 @@ def main():
     runner_os = os.getenv('RUNNER_OS') or platform.system()
     out_path = Path(args.out) if args.out else Path(f'gui-{runner_os}.zip')
 
-    assets_path = Path(args.assets)
+    assets_path = Path('assets')
     single_only = args.single
 
     # Determine binary name from the crate's Cargo.toml if possible
