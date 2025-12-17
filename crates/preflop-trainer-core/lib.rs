@@ -13,6 +13,7 @@ use std::collections::HashMap; // Add HashMap for uniqueness checks in tests
 use std::fmt;
 use std::fs;
 use std::str::FromStr;
+use dirs;
 
 lazy_static! {
     static ref EMPTY_HAND_RANGE: HashMap<HandNotation, f32> = HashMap::new();
@@ -436,8 +437,55 @@ pub struct GameConfig {
     pub allowed_spot_types: Vec<SpotType>,
 }
 
-pub fn load_and_parse_config(path: &str) -> Result<GameConfig, Box<dyn std::error::Error>> {
-    let contents = fs::read_to_string(path)?;
+use std::path::PathBuf;
+
+pub fn find_or_create_config() -> Result<PathBuf, std::io::Error> {
+    // 1. Check current working directory
+    let cwd_candidate = PathBuf::from("ranges.toml");
+    if cwd_candidate.exists() {
+        return Ok(cwd_candidate);
+    }
+
+    // 2. Check executable directory
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let exe_candidate = exe_dir.join("ranges.toml");
+            if exe_candidate.exists() {
+                return Ok(exe_candidate);
+            }
+        }
+    }
+
+    // 3. Check platform-specific config directory
+    if let Some(config_dir) = dirs::config_dir() {
+        let app_config_dir = config_dir.join("preflop-trainer");
+        if !app_config_dir.exists() {
+            fs::create_dir_all(&app_config_dir)?;
+        }
+        let config_path = app_config_dir.join("ranges.toml");
+        if config_path.exists() {
+            return Ok(config_path);
+        } else {
+            // 4. Create config from embedded example
+            let example_content = include_str!("../../ranges.toml.example");
+            fs::write(&config_path, example_content)?;
+            return Ok(config_path);
+        }
+    }
+
+    // 5. Fallback to a temporary file if all else fails
+    let tmp = std::env::temp_dir().join(format!(
+        "preflop_trainer_ranges_{}.toml",
+        std::process::id()
+    ));
+    let example_content = include_str!("../../ranges.toml.example");
+    fs::write(&tmp, example_content)?;
+    Ok(tmp)
+}
+
+pub fn load_config() -> Result<GameConfig, Box<dyn std::error::Error>> {
+    let config_path = find_or_create_config()?;
+    let contents = fs::read_to_string(config_path)?;
     let toml_config: TomlConfig = toml::from_str(&contents)?;
 
     let mut unopened_raise_ranges = HashMap::new();
@@ -461,8 +509,8 @@ pub fn load_and_parse_config(path: &str) -> Result<GameConfig, Box<dyn std::erro
 
     Ok(GameConfig {
         unopened_raise_ranges,
-        bb_defense_call_ranges,  // Use new fields
-        bb_defense_raise_ranges, // Use new fields
+        bb_defense_call_ranges,
+        bb_defense_raise_ranges,
         allowed_spot_types: if let Some(generic_config) = toml_config.generic {
             if let Some(toml_spot_types) = generic_config.allowed_spot_types {
                 toml_spot_types
@@ -470,7 +518,6 @@ pub fn load_and_parse_config(path: &str) -> Result<GameConfig, Box<dyn std::erro
                     .map(|s| SpotType::from_str(&s))
                     .collect::<Result<Vec<SpotType>, String>>()?
             } else {
-                // Default to all possible spots if 'allowed_spot_types' is not specified under '[generic]'
                 vec![
                     SpotType::Open {
                         position: Position::UTG,
@@ -505,7 +552,6 @@ pub fn load_and_parse_config(path: &str) -> Result<GameConfig, Box<dyn std::erro
                 ]
             }
         } else {
-            // Default to all possible spots if '[generic]' section is not present
             vec![
                 SpotType::Open {
                     position: Position::UTG,

@@ -5,9 +5,8 @@ mod unix_cli {
     use clap::{Parser, Subcommand};
     use colored::*;
     use preflop_trainer_core::{
-        AnswerResult, Game, UserAction, check_answer, load_and_parse_config,
-    };
-    use std::io::{Write, stdin, stdout};
+        AnswerResult, Game, UserAction, check_answer, load_config,
+    };    use std::io::{Write, stdin, stdout};
     use std::str::FromStr;
     use termion::{input::TermRead, raw::IntoRawMode};
 
@@ -49,7 +48,7 @@ mod unix_cli {
         write!(stdout, "--- Poker Preflop Trainer ---\r\n").unwrap();
         stdout.flush().unwrap();
 
-        let game_config = match load_and_parse_config("ranges.toml") {
+        let game_config = match load_config() {
             Ok(config) => config,
             Err(e) => {
                 write!(
@@ -207,7 +206,7 @@ mod unix_cli {
         let mut stdout = stdout().into_raw_mode().unwrap();
         let _stdin = stdin();
 
-        let _game_config = match load_and_parse_config("ranges.toml") {
+        let _game_config = match load_config() {
             Ok(config) => config,
             Err(e) => {
                 write!(

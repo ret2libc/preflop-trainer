@@ -76,53 +76,8 @@ impl Application for PreflopTrainerGui {
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        use std::path::PathBuf;
-        use std::process;
-
-        // Determine config path: prefer working dir, then executable directory, then embedded example.
-        let config_path = {
-            let cwd_candidate = PathBuf::from("ranges.toml");
-            if cwd_candidate.exists() {
-                cwd_candidate
-            } else if let Ok(exe_path) = std::env::current_exe() {
-                let exe_dir = exe_path
-                    .parent()
-                    .map(PathBuf::from)
-                    .unwrap_or_else(|| PathBuf::from("."));
-                let exe_candidate = exe_dir.join("ranges.toml");
-                if exe_candidate.exists() {
-                    exe_candidate
-                } else {
-                    // Fallback: write embedded example to a temp file and use it
-                    let tmp = std::env::temp_dir()
-                        .join(format!("preflop_trainer_ranges_{}.toml", process::id()));
-                    let _ = std::fs::write(
-                        &tmp,
-                        include_str!(concat!(
-                            env!("CARGO_MANIFEST_DIR"),
-                            "/../../ranges.toml.example"
-                        )),
-                    );
-                    tmp
-                }
-            } else {
-                // As a last resort, temp file from embedded example
-                let tmp = std::env::temp_dir()
-                    .join(format!("preflop_trainer_ranges_{}.toml", process::id()));
-                let _ = std::fs::write(
-                    &tmp,
-                    include_str!(concat!(
-                        env!("CARGO_MANIFEST_DIR"),
-                        "/../../ranges.toml.example"
-                    )),
-                );
-                tmp
-            }
-        };
-
-        let config =
-            preflop_trainer_core::load_and_parse_config(config_path.to_string_lossy().as_ref())
-                .expect("Failed to load or parse ranges.toml");
+        let config = preflop_trainer_core::load_config()
+            .expect("Failed to load or parse ranges.toml");
 
         let mut game = preflop_trainer_core::Game::new(config.clone());
         let (spot_type, hand, rng_value) = game

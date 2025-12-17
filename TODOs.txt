@@ -1,6 +1,6 @@
 # Preflop Trainer TODO List
 
-- [ ] Automatically create a basic ranges.toml file in the user directory (e.g. ~/.config/preflop-trainer/ranges.toml) if one is not provided.
+- [x] Automatically create a basic ranges.toml file in the user directory (e.g. ~/.config/preflop-trainer/ranges.toml) if one is not provided.
 - [ ] Allow users to configure ranges through the GUI when the program starts
 - [ ] Support 3bet preflop scenarios
 - [ ] Support 4bet preflop scenarios
