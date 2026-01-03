@@ -4,7 +4,6 @@
 #[macro_use]
 extern crate lazy_static;
 
-
 use rand::Rng;
 use rand::prelude::IndexedRandom; // Needed for .choose() method
 use rand::rngs::ThreadRng;
@@ -448,12 +447,13 @@ pub fn find_or_create_config() -> Result<PathBuf, std::io::Error> {
 
     // 2. Check executable directory
     if let Ok(exe_path) = std::env::current_exe()
-        && let Some(exe_dir) = exe_path.parent() {
-            let exe_candidate = exe_dir.join("ranges.toml");
-            if exe_candidate.exists() {
-                return Ok(exe_candidate); // Return immediately if found in exe dir
-            }
+        && let Some(exe_dir) = exe_path.parent()
+    {
+        let exe_candidate = exe_dir.join("ranges.toml");
+        if exe_candidate.exists() {
+            return Ok(exe_candidate); // Return immediately if found in exe dir
         }
+    }
 
     // 3. Check platform-specific config directory
     if let Some(config_dir) = dirs::config_dir() {
