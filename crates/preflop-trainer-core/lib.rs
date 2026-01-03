@@ -4,6 +4,7 @@
 #[macro_use]
 extern crate lazy_static;
 
+
 use rand::Rng;
 use rand::prelude::IndexedRandom; // Needed for .choose() method
 use rand::rngs::ThreadRng;
@@ -13,7 +14,6 @@ use std::collections::HashMap; // Add HashMap for uniqueness checks in tests
 use std::fmt;
 use std::fs;
 use std::str::FromStr;
-use dirs;
 
 lazy_static! {
     static ref EMPTY_HAND_RANGE: HashMap<HandNotation, f32> = HashMap::new();
@@ -447,14 +447,13 @@ pub fn find_or_create_config() -> Result<PathBuf, std::io::Error> {
     }
 
     // 2. Check executable directory
-    if let Ok(exe_path) = std::env::current_exe() {
-        if let Some(exe_dir) = exe_path.parent() {
+    if let Ok(exe_path) = std::env::current_exe()
+        && let Some(exe_dir) = exe_path.parent() {
             let exe_candidate = exe_dir.join("ranges.toml");
             if exe_candidate.exists() {
-                return Ok(exe_candidate);
+                return Ok(exe_candidate); // Return immediately if found in exe dir
             }
         }
-    }
 
     // 3. Check platform-specific config directory
     if let Some(config_dir) = dirs::config_dir() {

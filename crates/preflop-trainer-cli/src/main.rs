@@ -4,9 +4,8 @@
 mod unix_cli {
     use clap::{Parser, Subcommand};
     use colored::*;
-    use preflop_trainer_core::{
-        AnswerResult, Game, UserAction, check_answer, load_config,
-    };    use std::io::{Write, stdin, stdout};
+    use preflop_trainer_core::{AnswerResult, Game, UserAction, check_answer, load_config};
+    use std::io::{Write, stdin, stdout};
     use std::str::FromStr;
     use termion::{input::TermRead, raw::IntoRawMode};
 

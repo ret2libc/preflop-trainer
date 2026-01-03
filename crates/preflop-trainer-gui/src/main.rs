@@ -76,8 +76,8 @@ impl Application for PreflopTrainerGui {
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let config = preflop_trainer_core::load_config()
-            .expect("Failed to load or parse ranges.toml");
+        let config =
+            preflop_trainer_core::load_config().expect("Failed to load or parse ranges.toml");
 
         let mut game = preflop_trainer_core::Game::new(config.clone());
         let (spot_type, hand, rng_value) = game
